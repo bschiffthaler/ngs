@@ -2,6 +2,8 @@
 
 I am shamelessly copy/pasting the .MD file from the docker hub page which this source is used to build. 
 
+The dockerhub page is [here](https://registry.hub.docker.com/u/bschiffthaler/ngs/)!
+
 Build the docker with:
 
 ```
