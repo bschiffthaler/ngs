@@ -91,9 +91,9 @@ docker run --rm bschiffthaler/ngs find /usr/share/rRNA_databases -name "*.fasta"
 For convenience, I included an environment variable $SORTMERNA_DB, which can be passed to `sortmerna`'s `--ref` argument:
 
 ```
-docker run --rm bschiffthaler/ngs sortmerna --ref \$SORTMERNA_DB <...>
+docker run --rm bschiffthaler/ngs bash -c 'sortmerna --ref $SORTMERNA_DB <...>'
 ```
-The "\" here is crucial, since otherwise the environment variable would be searched from the host's variables.
+Wrapping the command in `bash -c` here is crucial, since otherwise the environment variable would not be passed correctly.
 
 If I would like to sort my FASTQ file which I got from sequencing:
 
