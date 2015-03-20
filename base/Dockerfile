@@ -50,7 +50,9 @@ RUN cp sortmerna /usr/local/bin && cp indexdb_rna /usr/local/bin
 RUN cp -r rRNA_databases/ /usr/share/
 WORKDIR /usr/share/rRNA_databases
 COPY indexdb.sh /usr/share/rRNA_databases/
+COPY makeDbList.sh /usr/share/rRNA_databases/
 RUN ./indexdb.sh
+ENV SORTMERNA_DB="/usr/share/rRNA_databases/rfam-5s-database-id98.fasta,/usr/share/rRNA_databases/rfam-5s-database-id98:/usr/share/rRNA_databases/silva-euk-28s-id98.fasta,/usr/share/rRNA_databases/silva-euk-28s-id98:/usr/share/rRNA_databases/silva-euk-18s-id95.fasta,/usr/share/rRNA_databases/silva-euk-18s-id95:/usr/share/rRNA_databases/silva-arc-16s-id95.fasta,/usr/share/rRNA_databases/silva-arc-16s-id95:/usr/share/rRNA_databases/silva-bac-16s-id90.fasta,/usr/share/rRNA_databases/silva-bac-16s-id90:/usr/share/rRNA_databases/silva-arc-23s-id98.fasta,/usr/share/rRNA_databases/silva-arc-23s-id98:/usr/share/rRNA_databases/silva-bac-23s-id98.fasta,/usr/share/rRNA_databases/silva-bac-23s-id98:/usr/share/rRNA_databases/rfam-5.8s-database-id98.fasta,/usr/share/rRNA_databases/rfam-5.8s-database-id98"
 WORKDIR /build
 RUN wget http://downloads.sourceforge.net/project/bio-bwa/bwa-0.7.12.tar.bz2 && \
 	tar -xf bwa-0.7.12.tar.bz2

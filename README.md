@@ -12,6 +12,8 @@ docker build -t <my_image_name> base
 
 ----------------------
 
+# General information
+
 Ready-to-work docker for next generation sequence analysis including binaries:
 
 * Sequence data QC [(FastQC)](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
@@ -19,10 +21,13 @@ Ready-to-work docker for next generation sequence analysis including binaries:
 * rRNA filtering [(SortMeRNA)](http://bioinfo.lifl.fr/RNA/sortmerna/) [2]
 * Genome mapping ([STAR](https://github.com/alexdobin/STAR) [3] , [BWA](http://bio-bwa.sourceforge.net/) [4] )
 * Feature Summarisation [(HTSeq)](http://www-huber.embl.de/HTSeq/doc/overview.html) [5]
+* File manipulation and exploration [(samtools,htslib,bcftools)](http://www.htslib.org/) [10] [11]
 
 For downstream analysis, this docker is based on bioconductor/release_sequencing [6] , which contains all the most commonly used downstream analysis tools implemented in R [7] .
 
 The ":with-data" tagged image contains a set of training data which is commonly used in our RNA-Seq training courses. The data is a sub-sampled set from Robinson, Delhomme et al. 2014 [9]. I also included the _Populus trichocarpa_ genome assembly and annotation [8] as well as a _P. tremula_ in-house draft assembly (not published, contact us for more information).
+
+The source (+Dockerfile) which was used to build this container, is [here](https://github.com/bschiffthaler/ngs) on GitHub! 
 
 # Common use cases
 
@@ -56,6 +61,8 @@ docker run --rm -v $(pwd):/data bschiffthaler/ngs zcat /data/my_sample.fq.gz | h
 
 The argument `-v $(pwd):/data` tells docker to mount the current working directory (from the `pwd` command) in the folder called `/data` within the container. Then, the `zcat` command is executed, which decompresses the file and streams the contents to the terminal. We pipe (using `|`) the output to the `head` command so that we only read the first few lines. Of course, this example is almost entirely non practical as you could do all of this without having the docker image.
 
+On Microsoft windows, the `$(pwd)` shortcut would not work to point to the current directory, here you can use `CD`.
+
 ## Technical quality control with FastQC
 
 As a small prologue to this section I would like to differentiate between technical and biological QA. As an example, technical QA would show sequencing errors, PCR over-amplification and similar issues, while a sample swap during the RNA extraction would not show up during this part. For the lack of a better term, we call methods to determine the latter type of issues "biological QA". This part is about technical QA.
@@ -73,13 +80,20 @@ This will output the FastQC report as html in the directory. For interpretation 
 
 ## rRNA sorting with SortMeRNA
 
-Sorting out rRNA contamination with `sortmerna` can be carried out in a similar manner. The rRNA databases which come with `sortmerna` are in `/usr/share/rRNA_databases` and have been pre-indexed during the build of the docker. The indexes are in `/usr/share/rRNA_databases/index` and are always prefixed with the same name (minus the ".fasta" ending) as the source FASTA file. The correct syntax of the command can be taken from `sortemrna -h` and the [sortmerna manual](http://bioinfo.lifl.fr/RNA/sortmerna/code/SortMeRNA-user-manual-v2.0.pdf).
+Sorting out rRNA contamination with `sortmerna` can be carried out in a similar manner. The rRNA databases which come with `sortmerna` are in `/usr/share/rRNA_databases` and have been pre-indexed during the build of the docker. The indexes are in `/usr/share/rRNA_databases/index` and are always prefixed with the same name (minus the ".fasta" ending) as the source FASTA file. The correct syntax of the command can be taken from `sortmerna -h` and the [sortmerna manual](http://bioinfo.lifl.fr/RNA/sortmerna/code/SortMeRNA-user-manual-v2.0.pdf).
 
 To list the available databases:
 
 ```
 docker run --rm bschiffthaler/ngs find /usr/share/rRNA_databases -name "*.fasta"
 ```
+
+For convenience, I included an environment variable $SORTMERNA_DB, which can be passed to `sortmerna`'s `--ref` argument:
+
+```
+docker run --rm bschiffthaler/ngs sortmerna --ref \$SORTMERNA_DB <...>
+```
+The "\" here is crucial, since otherwise the environment variable would be searched from the host's variables.
 
 If I would like to sort my FASTQ file which I got from sequencing:
 
@@ -114,7 +128,7 @@ This leaves me with a quality trimmed output file called "202_subset_1_sorted_tr
 
 ### Creating a STAR genome
 
-After downloading an appropriate reference genome assembly for my organism, I generate a STAR genome which STAR will use during the mapping step. NOTE: This step might require workstation with a somewhat large amount of RAM (see [STAR manual](https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf)). If you do not have that available there are several parameters available which will reduce the memory requirement (at the cost of mapping speed). Those are described in the appendix of the STAR manual. If availavle, it is highly advised to feed the annotation in the form of a GTF file into STAR's `genomeGenerate`. If the annotation is provided as GFF, the `cufflinks` software suite comes with a tool called `gffread` that is capable of converting the formats:
+After downloading an appropriate reference genome assembly for my organism, I generate a STAR genome which STAR will use during the mapping step. NOTE: This step might require workstation with a somewhat large amount of RAM (see [STAR manual](https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf)). If you do not have that available there are several parameters available which will reduce the memory requirement (at the cost of mapping speed). Those are described in the appendix of the STAR manual. If available, it is highly advised to feed the annotation in the form of a GTF file into STAR's `genomeGenerate`. If the annotation is provided as GFF, the `cufflinks` software suite comes with a tool called `gffread` that is capable of converting the formats:
 
 ```
 docker run -i -t --rm -v $(pwd):/data bschiffthaler/ngs STAR --runMode \
@@ -194,3 +208,6 @@ For the actual analysis, I would recommend the documentation of [DESeq2](http://
 
 [9] Robinson, K. M., Delhomme, N., Mähler, N., Schiffthaler, B., Onskog, J., Albrectsen, B. R., … Street, N. R. (2014). Populus tremula (European aspen) shows no evidence of sexual dimorphism. BMC Plant Biology, 14, 276. doi:10.1186/s12870-014-0276-5
 
+[10] Li, H., Handsaker, B., Wysoker, A., Fennell, T., Ruan, J., Homer, N., … Durbin, R. (2009). The Sequence Alignment/Map format and SAMtools. Bioinformatics, 25, 2078–2079. doi:10.1093/bioinformatics/btp352
+
+[11] Li, H. (2011). A statistical framework for SNP calling, mutation discovery, association mapping and population genetical parameter estimation from sequencing data. Bioinformatics, 27, 2987–2993. doi:10.1093/bioinformatics/btr509
