@@ -61,8 +61,6 @@ docker run --rm -v $(pwd):/data bschiffthaler/ngs zcat /data/my_sample.fq.gz | h
 
 The argument `-v $(pwd):/data` tells docker to mount the current working directory (from the `pwd` command) in the folder called `/data` within the container. Then, the `zcat` command is executed, which decompresses the file and streams the contents to the terminal. We pipe (using `|`) the output to the `head` command so that we only read the first few lines. Of course, this example is almost entirely non practical as you could do all of this without having the docker image.
 
-On Microsoft windows, the `$(pwd)` shortcut would not work to point to the current directory, here you can use `CD`.
-
 ## Technical quality control with FastQC
 
 As a small prologue to this section I would like to differentiate between technical and biological QA. As an example, technical QA would show sequencing errors, PCR over-amplification and similar issues, while a sample swap during the RNA extraction would not show up during this part. For the lack of a better term, we call methods to determine the latter type of issues "biological QA". This part is about technical QA.
@@ -73,8 +71,6 @@ After you receive your sequencing data, and after every step that modifies it (t
 #Here I assume that I have a FASTQ file called 202_subset_1.fq.gz in my current working directory
 docker run --rm -v $(pwd):/data bschiffthaler/ngs fastqc /data/202_subset_1.fq.gz
 ```
-
-Note that if you're running docker in Microsoft Windows, the `$(pwd)` shortcut will not work and you will have to replace this with the absolute path of the folder you would like to mount.
 
 This will output the FastQC report as html in the directory. For interpretation of that report, please refer to the manual or the aforementioned protocol.
 
