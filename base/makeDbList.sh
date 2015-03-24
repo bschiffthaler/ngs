@@ -9,7 +9,7 @@ echo -n "SORTMERNA_DB="
 for db in $dbFasta; do
     let currDb+=1;
     nam=$(basename $db);
-    echo -n "$db,/usr/share/rRNA_databases/${nam/.fasta/}";
+    echo -n "$db,/usr/share/rRNA_databases/index/${nam/.fasta/}";
     [[ currDb -lt dbLen ]] && echo -n ":";
 done
 echo
