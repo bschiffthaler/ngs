@@ -12,6 +12,11 @@ docker build -t <my_image_name> base
 
 ----------------------
 
+# News
+
+* JBrowse was added to allow for alignment visualisation (which also meant adding an apache2 server)
+* I recorded myself doing basic QC on the training data. Check [here](https://www.youtube.com/watch?v=1rNEkWSxB5s) for the video.
+
 # General information
 
 Ready-to-work docker for next generation sequence analysis including binaries:
@@ -22,6 +27,7 @@ Ready-to-work docker for next generation sequence analysis including binaries:
 * Genome mapping ([STAR](https://github.com/alexdobin/STAR) [3] , [BWA](http://bio-bwa.sourceforge.net/) [4] )
 * Feature Summarisation [(HTSeq)](http://www-huber.embl.de/HTSeq/doc/overview.html) [5]
 * File manipulation and exploration [(samtools,htslib,bcftools)](http://www.htslib.org/) [10] [11]
+* Alignment visualisation ([JBrowse](http://jbrowse.org/)) [12]
 
 For downstream analysis, this docker is based on bioconductor/release_sequencing [6] , which contains all the most commonly used downstream analysis tools implemented in R [7] .
 
@@ -45,6 +51,7 @@ For reasons of brevity, I will not be going into great detail (see the protocol)
 1. Mapping to the reference genome with STAR
 	*  Creating a STAR genome
 	*  Mapping my reads
+1. Visualisation of the alignments in JBrowse 
 1. Feature summarisation using HTSeq
 1. Downstream analysis using RStudio
 1. References
@@ -146,6 +153,51 @@ docker run -i -t --rm -v $(pwd):/data bschiffthaler/ngs STAR --genomeDir \
 --outFileNamePrefix /data/202_subset_1_sorted_trimmed_STAR
 ```
 
+## Alignment visualisation using JBrowse
+
+Unlike the previous commands, we need to keep the docker container alive and interactive, as JBrowse requires several steps to be functional. We will further need to map port 80 from the docker to the host in order to view alignments in apache. The option `-p 80:80` maps the port from the container to the host. Once we start apache, you can then open a web browser and navigate to your IP (on Linux hosts you can simply type "localhost" in the browser's address bar, on OSX and Windows hosts, you can find your docker's IP address if you run `boot2docker ip` from the boot2docker command. Look [here](https://docs.docker.com/userguide/usingdocker/#viewing-our-web-application-container) for more info.) The other options `-ti` tell docker that we want an interactive session, and that we want a (pseudo-)terminal to enter commands.
+
+```
+docker run -p 80:80 -v $(pwd):/data -ti bschiffthaler/ngs bash -l
+```
+First, we start by adding our reference(s) to JBrowse. This is done with perl scripts which are delivered with JBrowse. The reference sequence in FASTA format and the reference annotation in GFF3 format are in my current working directory, as are the alignment results in BAM format.
+
+Let's start by adding the FASTA and GFF3 files as tracks in JBrowse:
+
+```
+cd /var/www/html/JBrowse-1.11.6
+bin/prepare-refseqs.pl --fasta /data/Ptrichocarpa_v3.0_210.fa
+bin/flatfile-to-json.pl --gff /data/Ptrichocarpa_210_gene_exons.gff3 --trackType CanvasFeatures --trackLabel P.trichocarpa_v3.0_gene_exons
+```
+
+This has now added the reference sequence and annotation as tracks in JBrowse. Now let's add our alignments. I added a script to this docker, which automatically adds a read alignment viewer track as well as a SNP and coverage histogram track to the file `/var/www/html/JBrowse-1.11.6/data/tracks.conf`. My alignment files are in a sub-folder within my current working directory. Before you run the script to add tracks, please make sure that your alignment file is BAM formatted, sorted and indexed. If you ran `STAR` as described above, you should already have a sorted BAM file. If you haven't you can sort the file:
+
+```
+samtools sort /data/<my_BAM_file.bam> -o /data/<my_sorted_BAM_file.bam>
+```
+
+Then index the file
+
+```
+samtools index /data/<my_sorted_BAM_file.bam>
+```
+
+After that is done, we can add the tracks to JBrowse
+
+```
+add_JBrowse_tracks.sh /data
+```
+
+Finally, we can start the web server apache:
+
+```
+service apache2 start
+```
+
+Now, if we open a browser on the host and navigate to the aforementioned IP address (or localhost), we should see a link to JBrowse as well as the training user's home folder. Click on the JBrowse link, which will start JBrowse and browse your alignments!
+
+I added a screenshot [here](https://www.dropbox.com/s/mw2uvugrh06y44y/Screenshot%202015-04-10%2002.43.22.png?dl=0) of what you should see!
+
 ## Feature summarisation using HTSeq
 
 The final step before the actual differential expression testing is the feature summaristaion using HTSeq, specifically `htseq-count`. In this case we need to run the executable from within `bash -c` like this: `bash -c 'htseq-count <arguments>'`. The reason is that htseq-count does not write to a file, but writes to stdout, which means that we need to redirect stdout to a file. We could do `docker run <...> htseq-count <...> > my_counts.txt`, but only the htseq-count command would be run within docker and the redirection would be handled by the host, which has the unfortunate consequence that stderr output would be included in the file. This means that my_counts.txt would also contain diagnostic messages like "1,000,000 SAM lines processed". We work around this by running. [Here](http://www-huber.embl.de/users/anders/HTSeq/doc/count.html) is the htseq-count documentation to read about the options:
@@ -207,3 +259,5 @@ For the actual analysis, I would recommend the documentation of [DESeq2](http://
 [10] Li, H., Handsaker, B., Wysoker, A., Fennell, T., Ruan, J., Homer, N., … Durbin, R. (2009). The Sequence Alignment/Map format and SAMtools. Bioinformatics, 25, 2078–2079. doi:10.1093/bioinformatics/btp352
 
 [11] Li, H. (2011). A statistical framework for SNP calling, mutation discovery, association mapping and population genetical parameter estimation from sequencing data. Bioinformatics, 27, 2987–2993. doi:10.1093/bioinformatics/btr509
+
+[12] Skinner, M. E., Uzilov, A. V., Stein, L. D., Mungall, C. J., & Holmes, I. H. (2009). JBrowse: A next-generation genome browser. Genome Research, 19, 1630–1638. doi:10.1101/gr.094607.109
