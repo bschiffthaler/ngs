@@ -1,6 +1,6 @@
 #!/bin/bash
 JBROWSEDIR="/var/www/html/JBrowse-1.11.6/data"
-if [ $# > 0 ]; then
+if [ $# -gt 0 ]; then
 	INDIR=$@
 else
 	INDIR="/home/training"

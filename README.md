@@ -14,6 +14,7 @@ docker build -t <my_image_name> base
 
 # News
 
+* The base image now comes with an in-build SSH server in order to easily deploy it in a server setting.
 * JBrowse was added to allow for alignment visualisation (which also meant adding an apache2 server)
 * I recorded myself doing basic QC on the training data. Check [here](https://www.youtube.com/watch?v=1rNEkWSxB5s) for the video.
 
@@ -28,6 +29,9 @@ Ready-to-work docker for next generation sequence analysis including binaries:
 * Feature Summarisation [(HTSeq)](http://www-huber.embl.de/HTSeq/doc/overview.html) [5]
 * File manipulation and exploration [(samtools,htslib,bcftools)](http://www.htslib.org/) [10] [11]
 * Alignment visualisation ([JBrowse](http://jbrowse.org/)) [12]
+* Peak calling ([MACS2](http://liulab.dfci.harvard.edu/MACS/))  [13]
+* Sequence data analysis ([Useq](http://useq.sourceforge.net/)) [14]
+* Binding site determination ([SISSRs](http://www.rajajothi.com/sissrs/)) [15]
 
 For downstream analysis, this docker is based on bioconductor/release_sequencing [6] , which contains all the most commonly used downstream analysis tools implemented in R [7] .
 
@@ -261,3 +265,11 @@ For the actual analysis, I would recommend the documentation of [DESeq2](http://
 [11] Li, H. (2011). A statistical framework for SNP calling, mutation discovery, association mapping and population genetical parameter estimation from sequencing data. Bioinformatics, 27, 2987–2993. doi:10.1093/bioinformatics/btr509
 
 [12] Skinner, M. E., Uzilov, A. V., Stein, L. D., Mungall, C. J., & Holmes, I. H. (2009). JBrowse: A next-generation genome browser. Genome Research, 19, 1630–1638. doi:10.1101/gr.094607.109
+
+[13] Zhang, Y., Liu, T., Meyer, C. A., Eeckhoute, J., Johnson, D. S., Bernstein, B. E., … Liu, X. S. (2008). Model-based analysis of ChIP-Seq (MACS). Genome Biology, 9(9), R137. doi:10.1186/gb-2008-9-9-r137
+
+[14] Nix, D. A., Courdy, S. J., & Boucher, K. M. (2008). Empirical methods for controlling false positives and estimating confidence in ChIP-Seq peaks. BMC Bioinformatics, 9, 523. doi:10.1186/1471-2105-9-523
+
+[15] Jothi, R., Cuddapah, S., Barski, A., Cui, K., & Zhao, K. (2008). Genome-wide identification of in vivo protein-DNA binding sites from ChIP-Seq data. Nucleic Acids Research, 36(16), 5221–5231. doi:10.1093/nar/gkn488
+
+
