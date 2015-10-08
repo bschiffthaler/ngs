@@ -14,7 +14,8 @@ docker build -t <my_image_name> base
 
 # News
 
-* The base image now comes with an in-build SSH server in order to easily deploy it in a server setting.
+* SSH access has been replaced with Jupyter notebook. This also includes the jupyter R/Python kernels.
+* ~~The base image now comes with an in-build SSH server in order to easily deploy it in a server setting.~~
 * JBrowse was added to allow for alignment visualisation (which also meant adding an apache2 server)
 * I recorded myself doing basic QC on the training data. Check [here](https://www.youtube.com/watch?v=1rNEkWSxB5s) for the video.
 
