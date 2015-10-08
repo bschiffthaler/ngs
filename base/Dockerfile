@@ -1,16 +1,17 @@
 FROM bioconductor/release_sequencing
 MAINTAINER Bastian Schiffthaler (bastian@bioinformatics.upsc.se)
-RUN groupadd -g 2002 training && useradd -m -g 2002 -u 1010 training
+RUN groupadd -g 2000 training && useradd -m -u 2000 -g 2000 training
 RUN echo 'training:training' | chpasswd
 RUN mkdir /home/training/reference
 RUN mkdir /home/training/data
 RUN chsh -s /bin/bash training
 RUN echo "alias ll='ls -la -G'" >> /home/training/.profile
-RUN apt-get update &&  apt-get install -y \
+RUN     apt-get update && \
+	apt-get install -y \
 	build-essential wget libghc-zlib-dev \
-	libncurses-dev git unzip openjdk-7-jdk \
-	nano python2.7-dev python-numpy \
-	python-matplotlib apache2 ssh && \
+	libncurses-dev git unzip ftp libzmq3-dev \
+	nano libpython2.7-dev python2.7-dev python-numpy ftp \
+	python-matplotlib apache2 openssl && \
 	mkdir build && \
 	usermod -G training,www-data training
 WORKDIR /build
@@ -67,7 +68,8 @@ RUN make && \
 	cp bwa /usr/local/bin/ && \
 	pip install htseq && \
 	pip install PySam && \
-	pip install MACS2
+	pip install MACS2 && \
+	pip install jupyter
 WORKDIR /build
 RUN mkdir /data && \
     wget http://downloads.sourceforge.net/project/useq/USeq_8.9.2.zip && \
@@ -90,6 +92,15 @@ RUN ./setup.sh && \
 WORKDIR /
 RUN rm /var/www/html/JBrowse-1.11.6.zip && \
     rm -rf /build/*
+ENV R_LIBS="/home/training/.r-library"
+ADD scripts/R_installs.R /build/R_installs.R
+ADD .Renviron /home/training/.Renviron
+RUN mkdir /home/training/.r-library && \
+    chown -R training:training /home/training/.Renviron && \
+    chown -R training:training /home/training/.r-library && \
+    chmod 755 /home/training/.r-library && \
+    sudo -u training Rscript /build/R_installs.R
 ADD scripts/add_JBrowse_tracks.sh /usr/local/bin/add_JBrowse_tracks.sh
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+EXPOSE 80 8888 8787
 CMD ["/usr/bin/supervisord","-c","/etc/supervisor/conf.d/supervisord.conf"]
