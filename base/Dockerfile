@@ -14,7 +14,8 @@ RUN     apt-get update && \
 	apt-get install -y \
 	build-essential wget libghc-zlib-dev \
 	libncurses-dev git unzip ftp libzmq3-dev \
-	nano libpython2.7-dev python2.7-dev python-numpy ftp \
+	nano python2.7-dev python3-dev \
+	python3-pip python-numpy ftp \
 	python-matplotlib apache2 openssl && \
 	mkdir build && \
 	usermod -G training,www-data training
@@ -101,7 +102,7 @@ RUN make && \
 	pip install htseq && \
 	pip install PySam && \
 	pip install MACS2 && \
-	pip install jupyter
+	pip3 install jupyter
 WORKDIR /build
 
 #########
