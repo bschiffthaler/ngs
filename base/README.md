@@ -1,5 +1,6 @@
 # News
 
+* GateOne was added as a decent option to connect via SSH cross-platform
 * JBrowse was added to allow for alignment visualisation (which also meant adding an apache2 server)
 * I recorded myself doing basic QC on the training data. Check [here](https://www.youtube.com/watch?v=1rNEkWSxB5s) for the video.
 

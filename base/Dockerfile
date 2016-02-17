@@ -17,7 +17,7 @@ RUN     apt-get update && \
 	nano python2.7-dev python3-dev \
 	python3-pip python-numpy ftp \
 	python-matplotlib apache2 openssl && \
-	mkdir build && \
+	mkdir build openssh-server && \
 	usermod -G training,www-data training
 WORKDIR /build
 
@@ -95,15 +95,22 @@ RUN wget http://downloads.sourceforge.net/project/bio-bwa/bwa-0.7.12.tar.bz2 && 
 WORKDIR bwa-0.7.12
 
 #########
-### Pip installs: HTSeq, PySam, MACS2, jupyter notebook
+### Pip installs: HTSeq, PySam, MACS2
 #########
 RUN make && \
 	cp bwa /usr/local/bin/ && \
 	pip install htseq && \
 	pip install PySam && \
 	pip install MACS2 && \
-	pip3 install jupyter
+	pip install tornado
 WORKDIR /build
+
+#########
+### GateOne SSH interface
+#########
+RUN git clone https://github.com/liftoff/GateOne/ && \
+    cd GateOne && python setup.py install && \
+    python run_gateone.py --configure && cd ..
 
 #########
 ### USeq and Sissrs
@@ -148,5 +155,5 @@ RUN mkdir /home/training/.r-library && \
     sudo -u training Rscript /build/R_installs.R
 
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-EXPOSE 80 8888 8787
+EXPOSE 80 8888 8787 443
 CMD ["/usr/bin/supervisord","-c","/etc/supervisor/conf.d/supervisord.conf"]
