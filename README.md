@@ -14,8 +14,7 @@ docker build -t <my_image_name> base
 
 # News
 
-* SSH access has been replaced with Jupyter notebook. This also includes the jupyter R/Python kernels.
-* ~~The base image now comes with an in-build SSH server in order to easily deploy it in a server setting.~~
+* GateOne was added as a decent	option to connect via SSH cross-platform
 * JBrowse was added to allow for alignment visualisation (which also meant adding an apache2 server)
 * I recorded myself doing basic QC on the training data. Check [here](https://www.youtube.com/watch?v=1rNEkWSxB5s) for the video.
 
@@ -26,7 +25,7 @@ Ready-to-work docker for next generation sequence analysis including binaries:
 * Sequence data QC [(FastQC)](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 * Trimming [(Trimmomatic)](http://www.usadellab.org/cms/?page=trimmomatic) [1]
 * rRNA filtering [(SortMeRNA)](http://bioinfo.lifl.fr/RNA/sortmerna/) [2]
-* Genome mapping ([STAR](https://github.com/alexdobin/STAR) [3] , [BWA](http://bio-bwa.sourceforge.net/) [4] )
+* Genome mapping ([STAR](https://github.com/alexdobin/STAR) [3] , [BWA](http://bio-bwa.sourceforge.net/) [4] , [kallisto](https://pachterlab.github.io/kallisto/) [16])
 * Feature Summarisation [(HTSeq)](http://www-huber.embl.de/HTSeq/doc/overview.html) [5]
 * File manipulation and exploration [(samtools,htslib,bcftools)](http://www.htslib.org/) [10] [11]
 * Alignment visualisation ([JBrowse](http://jbrowse.org/)) [12]
@@ -273,4 +272,4 @@ For the actual analysis, I would recommend the documentation of [DESeq2](http://
 
 [15] Jothi, R., Cuddapah, S., Barski, A., Cui, K., & Zhao, K. (2008). Genome-wide identification of in vivo protein-DNA binding sites from ChIP-Seq data. Nucleic Acids Research, 36(16), 5221–5231. doi:10.1093/nar/gkn488
 
-
+[16] Bray, N. L., Pimentel, H., Melsted, P., & Pachter, L. (2015). Near-optimal RNA-Seq quantification. aRxiv. http://doi.org/arXiv:1505.02710

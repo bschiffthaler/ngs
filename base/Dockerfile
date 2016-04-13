@@ -10,73 +10,83 @@ RUN echo "alias ll='ls -la -G'" >> /home/training/.profile
 #########
 ### Aptitude packages
 #########
-RUN     apt-get update && \
-	apt-get install -y \
-	build-essential wget libghc-zlib-dev \
-	libncurses-dev git unzip ftp libzmq3-dev \
-	nano python2.7-dev python-dev python-numpy ftp \
-	python-matplotlib apache2 openssl openssh-server && \
-	mkdir build && \
-	usermod -G training,www-data training
+RUN     apt-get update
+RUN    apt-get install -y \
+    build-essential wget libghc-zlib-dev \
+    libncurses-dev git unzip ftp libzmq3-dev \
+    nano python2.7-dev python-numpy ftp \
+    python-matplotlib apache2 openssl \
+    supervisor openssh-server && \
+    mkdir build && \
+    usermod -G training,www-data training
 WORKDIR /build
 
 #########
 ### HTSlib tools: Samtools, Bcftools
 #########
-RUN wget https://github.com/samtools/samtools/releases/download/1.2/samtools-1.2.tar.bz2 \
-	https://github.com/samtools/bcftools/releases/download/1.2/bcftools-1.2.tar.bz2 \
-	https://github.com/samtools/htslib/releases/download/1.2.1/htslib-1.2.1.tar.bz2 && \
-	tar -xf htslib-1.2.1.tar.bz2
-WORKDIR htslib-1.2.1
+RUN wget https://github.com/samtools/samtools/releases/download/1.3/samtools-1.3.tar.bz2 \
+    https://github.com/samtools/bcftools/releases/download/1.3/bcftools-1.3.tar.bz2 \
+    https://github.com/samtools/htslib/releases/download/1.3/htslib-1.3.tar.bz2 && \
+    tar -xf htslib-1.3.tar.bz2
+WORKDIR htslib-1.3
 RUN ./configure && make && make install
 WORKDIR /build
-RUN tar -xf bcftools-1.2.tar.bz2
-WORKDIR bcftools-1.2
+RUN tar -xf bcftools-1.3.tar.bz2
+WORKDIR bcftools-1.3
 RUN make && make install
 WORKDIR /build
-RUN tar -xf samtools-1.2.tar.bz2
-WORKDIR samtools-1.2
+RUN tar -xf samtools-1.3.tar.bz2
+WORKDIR samtools-1.3
 RUN make && make install
 WORKDIR /build
 
 #########
 ### STAR
 #########
-RUN wget https://github.com/alexdobin/STAR/archive/STAR_2.4.0j.tar.gz && \
-	tar -xf STAR_2.4.0j.tar.gz
-WORKDIR STAR-STAR_2.4.0j/bin/Linux_x86_64_static
+RUN wget https://github.com/alexdobin/STAR/archive/2.5.1b.tar.gz && \
+    tar -xf 2.5.1b.tar.gz
+WORKDIR STAR-2.5.1b/bin/Linux_x86_64_static
 RUN cp STAR /usr/local/bin
+WORKDIR /build
+
+#########
+### kallisto
+#########
+RUN wget https://github.com/pachterlab/kallisto/releases/download/v0.42.5/kallisto_linux-v0.42.5.tar.gz && \
+    tar -xf kallisto_linux-v0.42.5.tar.gz
+WORKDIR kallisto_linux-v0.42.5
+RUN cp kallisto /usr/local/bin
 WORKDIR /build
 
 #########
 ### BEDtools
 #########
-RUN wget https://github.com/arq5x/bedtools2/releases/download/v2.23.0/bedtools-2.23.0.tar.gz && \
-	tar -xf bedtools-2.23.0.tar.gz && cd bedtools2 && \
-	make && make install
+RUN wget https://github.com/arq5x/bedtools2/releases/download/v2.25.0/bedtools-2.25.0.tar.gz && \
+    tar -xf bedtools-2.25.0.tar.gz && cd bedtools2 && \
+    make && make install
 
 #########
 ### Java tools: Trimmomatic, FastQC
 #########
-RUN wget http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.2.zip && \
-	unzip fastqc_v0.11.2.zip && \
-	chmod +x FastQC/fastqc && \
-	cp -r FastQC /usr/share/ && \
-	ln -s /usr/share/FastQC/fastqc /usr/bin/ && \
-	wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.33.zip && \
-	unzip Trimmomatic-0.33.zip && \
-	cp -r Trimmomatic-0.33 /usr/share/ && \
-	echo '#!/bin/bash\njava -jar /usr/share/Trimmomatic-0.33/trimmomatic-0.33.jar $@' > /usr/bin/trimmomatic && \
-	chmod +x /usr/bin/trimmomatic && \
-	wget http://bioinfo.lifl.fr/RNA/sortmerna/code/sortmerna-2.0-linux-64.tar.gz && \
-	tar -xf sortmerna-2.0-linux-64.tar.gz
+RUN wget http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.5.zip && \
+    unzip fastqc_v0.11.5.zip && \
+    chmod +x FastQC/fastqc && \
+    cp -r FastQC /usr/share/ && \
+    ln -s /usr/share/FastQC/fastqc /usr/bin/ && \
+    wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.36.zip && \
+    unzip Trimmomatic-0.36.zip && \
+    cp -r Trimmomatic-0.36 /usr/share/ && \
+    echo '#!/bin/bash\njava -jar /usr/share/Trimmomatic-0.36/trimmomatic-0.36.jar $@' > /usr/bin/trimmomatic && \
+    chmod +x /usr/bin/trimmomatic
 
 #########
 ### SortmeRNA
 #########
-WORKDIR sortmerna-2.0-linux-64
+RUN wget http://bioinfo.lifl.fr/RNA/sortmerna/code/sortmerna-2.1-linux-64.tar.gz && \
+    tar -xf sortmerna-2.1-linux-64.tar.gz
+WORKDIR sortmerna-2.1-linux-64
 RUN cp sortmerna /usr/local/bin && cp indexdb_rna /usr/local/bin && \
-	cp -r rRNA_databases/ /usr/share/
+    cp -r rRNA_databases/ /usr/share/
 WORKDIR /usr/share/rRNA_databases
 COPY scripts/indexdb.sh /usr/share/rRNA_databases/
 COPY scripts/makeDbList.sh /usr/share/rRNA_databases/
@@ -89,34 +99,27 @@ WORKDIR /build
 #########
 ### BWA
 #########
-RUN wget http://downloads.sourceforge.net/project/bio-bwa/bwa-0.7.12.tar.bz2 && \
-	tar -xf bwa-0.7.12.tar.bz2
-WORKDIR bwa-0.7.12
+RUN wget http://downloads.sourceforge.net/project/bio-bwa/bwa-0.7.13.tar.bz2 && \
+    tar -xf bwa-0.7.13.tar.bz2
+WORKDIR bwa-0.7.13
 
 #########
 ### Pip installs: HTSeq, PySam, MACS2
 #########
 RUN make && \
-	cp bwa /usr/local/bin/ && \
-	pip install htseq && \
-	pip install PySam && \
-	pip install MACS2 && \
-	pip install tornado
+    cp bwa /usr/local/bin/ && \
+    pip install htseq && \
+    pip install PySam && \
+    pip install MACS2 && \
+    pip install tornado
 WORKDIR /build
-
-#########
-### GateOne SSH interface
-#########
-RUN git clone https://github.com/liftoff/GateOne/ && \
-    cd GateOne && python setup.py install && \
-    python run_gateone.py --configure && cd ..
 
 #########
 ### USeq and Sissrs
 #########
 RUN mkdir /data && \
-    wget http://downloads.sourceforge.net/project/useq/USeq_8.9.2.zip && \
-    unzip USeq_8.9.2.zip && mv USeq_8.9.2 /usr/share/USeq && \
+    wget http://downloads.sourceforge.net/project/useq/USeq_8.9.6.zip && \
+    unzip USeq_8.9.6.zip && mv USeq_8.9.6 /usr/share/USeq && \
     wget http://dir.nhlbi.nih.gov/papers/lmi/epigenomes/sissrs/sissrs_v1.4.tar.gz && \
     tar -xf sissrs_v1.4.tar.gz && \
     cp sissrs.pl /usr/local/bin
@@ -135,11 +138,18 @@ RUN ./setup.sh && \
     chown -R www-data:www-data /var/www/html && \
     chmod a+rwx /var/www/html/JBrowse-1.11.6/data/bam && \
     touch data/tracks.conf && \
-    chmod a+rw	/var/www/html/JBrowse-1.11.6/data/tracks.conf
+    chmod a+rw    /var/www/html/JBrowse-1.11.6/data/tracks.conf
 WORKDIR /
 RUN rm /var/www/html/JBrowse-1.11.6.zip && \
     rm -rf /build/*
 ADD scripts/add_JBrowse_tracks.sh /usr/local/bin/add_JBrowse_tracks.sh
+
+#########
+### GateOne SSH interface
+#########
+RUN git clone https://github.com/liftoff/GateOne/ && \
+    cd GateOne && python setup.py install && \
+    python run_gateone.py --configure && cd ..
 
 #########
 ### R installs
