@@ -24,45 +24,45 @@ WORKDIR /build
 #########
 ### HTSlib tools: Samtools, Bcftools
 #########
-RUN wget https://github.com/samtools/samtools/releases/download/1.3/samtools-1.3.tar.bz2 \
-    https://github.com/samtools/bcftools/releases/download/1.3/bcftools-1.3.tar.bz2 \
-    https://github.com/samtools/htslib/releases/download/1.3/htslib-1.3.tar.bz2 && \
-    tar -xf htslib-1.3.tar.bz2
-WORKDIR htslib-1.3
+RUN wget https://github.com/samtools/samtools/releases/download/1.3.1/samtools-1.3.1.tar.bz2 \
+    https://github.com/samtools/bcftools/releases/download/1.3.1/bcftools-1.3.1.tar.bz2 \
+    https://github.com/samtools/htslib/releases/download/1.3.1/htslib-1.3.1.tar.bz2 && \
+    tar -xf htslib-1.3.1.tar.bz2
+WORKDIR htslib-1.3.1
 RUN ./configure && make && make install
 WORKDIR /build
-RUN tar -xf bcftools-1.3.tar.bz2
-WORKDIR bcftools-1.3
+RUN tar -xf bcftools-1.3.1.tar.bz2
+WORKDIR bcftools-1.3.1
 RUN make && make install
 WORKDIR /build
-RUN tar -xf samtools-1.3.tar.bz2
-WORKDIR samtools-1.3
+RUN tar -xf samtools-1.3.1.tar.bz2
+WORKDIR samtools-1.3.1
 RUN make && make install
 WORKDIR /build
 
 #########
 ### STAR
 #########
-RUN wget https://github.com/alexdobin/STAR/archive/2.5.1b.tar.gz && \
-    tar -xf 2.5.1b.tar.gz
-WORKDIR STAR-2.5.1b/bin/Linux_x86_64_static
+RUN wget https://github.com/alexdobin/STAR/archive/2.5.2a.tar.gz && \
+    tar -xf 2.5.2a.tar.gz
+WORKDIR STAR-2.5.2a/bin/Linux_x86_64_static
 RUN cp STAR /usr/local/bin
 WORKDIR /build
 
 #########
 ### kallisto
 #########
-RUN wget https://github.com/pachterlab/kallisto/releases/download/v0.42.5/kallisto_linux-v0.42.5.tar.gz && \
-    tar -xf kallisto_linux-v0.42.5.tar.gz
-WORKDIR kallisto_linux-v0.42.5
+RUN wget https://github.com/pachterlab/kallisto/releases/download/v0.43.0/kallisto_linux-v0.43.0.tar.gz && \
+    tar -xf kallisto_linux-v0.43.0.tar.gz
+WORKDIR kallisto_linux-v0.43.0
 RUN cp kallisto /usr/local/bin
 WORKDIR /build
 
 #########
 ### BEDtools
 #########
-RUN wget https://github.com/arq5x/bedtools2/releases/download/v2.25.0/bedtools-2.25.0.tar.gz && \
-    tar -xf bedtools-2.25.0.tar.gz && cd bedtools2 && \
+RUN wget https://github.com/arq5x/bedtools2/releases/download/v2.26.0/bedtools-2.26.0.tar.gz && \
+    tar -xf bedtools-2.26.0.tar.gz && cd bedtools2 && \
     make && make install
 
 #########
@@ -99,9 +99,10 @@ WORKDIR /build
 #########
 ### BWA
 #########
-RUN wget http://downloads.sourceforge.net/project/bio-bwa/bwa-0.7.13.tar.bz2 && \
-    tar -xf bwa-0.7.13.tar.bz2
-WORKDIR bwa-0.7.13
+RUN wget https://github.com/lh3/bwa/releases/download/v0.7.15/bwa-0.7.15.tar.bz2 && \
+    tar -xf bwa-0.7.15.tar.bz2
+WORKDIR bwa-0.7.15
+RUN make && cp bwa /usr/local/bin
 
 #########
 ### Pip installs: HTSeq, PySam, MACS2
@@ -130,17 +131,17 @@ RUN mkdir /data && \
 RUN rm /var/www/html/index.html && \
     ln -sf /home/training /var/www/html/home
 WORKDIR /var/www/html
-RUN curl -O http://jbrowse.org/releases/JBrowse-1.11.6.zip && \
-    unzip JBrowse-1.11.6.zip
-WORKDIR /var/www/html/JBrowse-1.11.6
+RUN curl -O http://jbrowse.org/releases/JBrowse-1.12.1.zip && \
+    unzip JBrowse-1.12.1.zip
+WORKDIR /var/www/html/JBrowse-1.12.1
 RUN ./setup.sh && \
     mkdir -p data/bam && \
     chown -R www-data:www-data /var/www/html && \
-    chmod a+rwx /var/www/html/JBrowse-1.11.6/data/bam && \
+    chmod a+rwx /var/www/html/JBrowse-1.12.1/data/bam && \
     touch data/tracks.conf && \
-    chmod a+rw    /var/www/html/JBrowse-1.11.6/data/tracks.conf
+    chmod a+rw    /var/www/html/JBrowse-1.12.1/data/tracks.conf
 WORKDIR /
-RUN rm /var/www/html/JBrowse-1.11.6.zip && \
+RUN rm /var/www/html/JBrowse-1.12.1.zip && \
     rm -rf /build/*
 ADD scripts/add_JBrowse_tracks.sh /usr/local/bin/add_JBrowse_tracks.sh
 
