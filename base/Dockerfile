@@ -10,8 +10,8 @@ RUN echo "alias ll='ls -la -G'" >> /home/training/.profile
 #########
 ### Aptitude packages
 #########
-RUN     apt-get update
-RUN    apt-get install -y \
+RUN apt-get update
+RUN apt-get install -y \
     build-essential wget libghc-zlib-dev \
     libncurses-dev git unzip ftp libzmq3-dev \
     nano python2.7-dev python-numpy ftp \
@@ -26,9 +26,9 @@ WORKDIR /build
 #########
 RUN wget https://github.com/samtools/samtools/releases/download/1.3.1/samtools-1.3.1.tar.bz2 \
     https://github.com/samtools/bcftools/releases/download/1.3.1/bcftools-1.3.1.tar.bz2 \
-    https://github.com/samtools/htslib/releases/download/1.3.1/htslib-1.3.1.tar.bz2 && \
-    tar -xf htslib-1.3.1.tar.bz2
-WORKDIR htslib-1.3.1
+    https://github.com/samtools/htslib/releases/download/1.3.2/htslib-1.3.2.tar.bz2 && \
+    tar -xf htslib-1.3.2.tar.bz2
+WORKDIR htslib-1.3.2
 RUN ./configure && make && make install
 WORKDIR /build
 RUN tar -xf bcftools-1.3.1.tar.bz2
@@ -43,9 +43,9 @@ WORKDIR /build
 #########
 ### STAR
 #########
-RUN wget https://github.com/alexdobin/STAR/archive/2.5.2a.tar.gz && \
-    tar -xf 2.5.2a.tar.gz
-WORKDIR STAR-2.5.2a/bin/Linux_x86_64_static
+RUN wget https://github.com/alexdobin/STAR/archive/2.5.2b.tar.gz && \
+    tar -xf 2.5.2b.tar.gz
+WORKDIR STAR-2.5.2b/bin/Linux_x86_64_static
 RUN cp STAR /usr/local/bin
 WORKDIR /build
 
@@ -112,15 +112,16 @@ RUN make && \
     pip install htseq && \
     pip install PySam && \
     pip install MACS2 && \
-    pip install tornado
+    pip install tornado && \
+    pip install multiqc
 WORKDIR /build
 
 #########
 ### USeq and Sissrs
 #########
 RUN mkdir /data && \
-    wget http://downloads.sourceforge.net/project/useq/USeq_8.9.6.zip && \
-    unzip USeq_8.9.6.zip && mv USeq_8.9.6 /usr/share/USeq && \
+    wget https://github.com/HuntsmanCancerInstitute/USeq/releases/download/USeq_9.0.7/USeq_9.0.7.zip && \
+    unzip USeq_9.0.7.zip && mv USeq_9.0.7 /usr/share/USeq && \
     wget http://dir.nhlbi.nih.gov/papers/lmi/epigenomes/sissrs/sissrs_v1.4.tar.gz && \
     tar -xf sissrs_v1.4.tar.gz && \
     cp sissrs.pl /usr/local/bin
