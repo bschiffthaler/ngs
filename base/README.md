@@ -1,10 +1,14 @@
 # News
 
+- Moved to use bioconductor/release_core2 instead of the release_sequencing legacy image
+- Added salmon
+- SortMeRNA is now source compiled due to a threading bug that prevented parallelism to work
+- Updated htslib to 1.4, STAR to 2.5.3a, USEQ to 9.0.8
 - Updated htslib to 1.3.2, STAR to 2.5.2b, USEQ to 9.0.7
 - Added MultiQC
 - Discontinued the ":with-data" tag
 - Kallisto was added for alignment free transcript quantification
-  - GateOne was added as a decentoption to connect via SSH cross-platform
+- GateOne was added as a decentoption to connect via SSH cross-platform
 - JBrowse was added to allow for alignment visualisation (which also meant adding an apache2 server)
 - I recorded myself doing basic QC on the training data. Check [here](https://www.youtube.com/watch?v=1rNEkWSxB5s) for the video.
 
@@ -15,7 +19,7 @@ Ready-to-work docker for next generation sequence analysis including binaries:
 - Sequence data QC ([FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/), [MultiQC](http://multiqc.info/)) [15]
 - Trimming [(Trimmomatic)](http://www.usadellab.org/cms/?page=trimmomatic) [1]
 - rRNA filtering [(SortMeRNA)](http://bioinfo.lifl.fr/RNA/sortmerna/) [2]
-- Genome mapping ([STAR](https://github.com/alexdobin/STAR) [3] , [BWA](http://bio-bwa.sourceforge.net/) [4] , [kallisto](https://pachterlab.github.io/kallisto/) [14])
+- Genome mapping ([STAR](https://github.com/alexdobin/STAR) [3] , [BWA](http://bio-bwa.sourceforge.net/) [4] , [kallisto](https://pachterlab.github.io/kallisto/) [14], [salmon](https://combine-lab.github.io/salmon/)[16])
 - Feature Summarisation [(HTSeq)](http://www-huber.embl.de/HTSeq/doc/overview.html) [5]
 - File manipulation and exploration [(samtools,htslib,bcftools)](http://www.htslib.org/) [8],[9]
 - Alignment visualisation ([JBrowse](http://jbrowse.org/)) [10]
@@ -260,3 +264,5 @@ For the actual analysis, I would recommend the documentation of [DESeq2](http://
 [14] Bray, N. L., Pimentel, H., Melsted, P., & Pachter, L. (2015). Near-optimal RNA-Seq quantification. aRxiv. http://doi.org/arXiv:1505.02710
 
 [15] Ewels, P., Magnusson, M., Lundin, S., & K??ller, M. (2016). MultiQC: Summarize analysis results for multiple tools and samples in a single report. Bioinformatics, 32(19), 3047–3048. http://doi.org/10.1093/bioinformatics/btw354
+
+[16] Patro, R., Duggal, G., Love, M. I., Irizarry, R. A., & Kingsford, C. (2017). Salmon provides fast and bias-aware quantification of transcript expression. Nature Methods.

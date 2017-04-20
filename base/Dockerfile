@@ -1,5 +1,5 @@
-FROM bioconductor/release_sequencing
-MAINTAINER Bastian Schiffthaler (bastian@bioinformatics.upsc.se)
+FROM bioconductor/release_core2
+MAINTAINER Bastian Schiffthaler (b.schiffthaler@gmail.com)
 RUN groupadd -g 2000 training && useradd -m -u 2000 -g 2000 training
 RUN echo 'training:training' | chpasswd
 RUN mkdir /home/training/reference
@@ -10,13 +10,14 @@ RUN echo "alias ll='ls -la -G'" >> /home/training/.profile
 #########
 ### Aptitude packages
 #########
-RUN apt-get update
-RUN apt-get install -y \
-    build-essential wget libghc-zlib-dev \
+RUN apt update
+RUN apt install -y \
+    wget libghc-zlib-dev \
     libncurses-dev git unzip ftp libzmq3-dev \
-    nano python2.7-dev python-numpy ftp \
-    python-matplotlib apache2 openssl \
-    supervisor openssh-server && \
+    nano python2.7-dev ftp \
+    apache2 openssl curl libboost-all-dev \
+    supervisor openssh-server libbz2-dev \
+    liblzma-dev automake cmake && \
     mkdir build && \
     usermod -G training,www-data training
 WORKDIR /build
@@ -24,46 +25,56 @@ WORKDIR /build
 #########
 ### HTSlib tools: Samtools, Bcftools
 #########
-RUN wget https://github.com/samtools/samtools/releases/download/1.3.1/samtools-1.3.1.tar.bz2 \
-    https://github.com/samtools/bcftools/releases/download/1.3.1/bcftools-1.3.1.tar.bz2 \
-    https://github.com/samtools/htslib/releases/download/1.3.2/htslib-1.3.2.tar.bz2 && \
-    tar -xf htslib-1.3.2.tar.bz2
-WORKDIR htslib-1.3.2
-RUN ./configure && make && make install
+RUN wget https://github.com/samtools/samtools/releases/download/1.4/samtools-1.4.tar.bz2 \
+    https://github.com/samtools/bcftools/releases/download/1.4/bcftools-1.4.tar.bz2 \
+    https://github.com/samtools/htslib/releases/download/1.4/htslib-1.4.tar.bz2 && \
+    tar -xf htslib-1.4.tar.bz2
+WORKDIR htslib-1.4
+RUN ./configure && make -j 4 && make install
 WORKDIR /build
-RUN tar -xf bcftools-1.3.1.tar.bz2
-WORKDIR bcftools-1.3.1
-RUN make && make install
+RUN tar -xf bcftools-1.4.tar.bz2
+WORKDIR bcftools-1.4
+RUN make -j 4 && make install
 WORKDIR /build
-RUN tar -xf samtools-1.3.1.tar.bz2
-WORKDIR samtools-1.3.1
-RUN make && make install
+RUN tar -xf samtools-1.4.tar.bz2
+WORKDIR samtools-1.4
+RUN make -j 4 && make install
 WORKDIR /build
 
 #########
 ### STAR
 #########
-RUN wget https://github.com/alexdobin/STAR/archive/2.5.2b.tar.gz && \
-    tar -xf 2.5.2b.tar.gz
-WORKDIR STAR-2.5.2b/bin/Linux_x86_64_static
+RUN wget https://github.com/alexdobin/STAR/archive/2.5.3a.tar.gz && \
+    tar -xf 2.5.3a.tar.gz
+WORKDIR STAR-2.5.3a/bin/Linux_x86_64_static
 RUN cp STAR /usr/local/bin
 WORKDIR /build
 
 #########
 ### kallisto
 #########
-RUN wget https://github.com/pachterlab/kallisto/releases/download/v0.43.0/kallisto_linux-v0.43.0.tar.gz && \
-    tar -xf kallisto_linux-v0.43.0.tar.gz
-WORKDIR kallisto_linux-v0.43.0
+RUN wget https://github.com/pachterlab/kallisto/releases/download/v0.43.1/kallisto_linux-v0.43.1.tar.gz && \
+    tar -xf kallisto_linux-v0.43.1.tar.gz
+WORKDIR kallisto_linux-v0.43.1
 RUN cp kallisto /usr/local/bin
 WORKDIR /build
+
+#########
+### Salmon
+#########
+WORKDIR /build
+RUN wget https://github.com/COMBINE-lab/salmon/archive/v0.8.2.tar.gz && \
+    tar -xf v0.8.2.tar.gz && \
+    cd /build/salmon-0.8.2 && mkdir build && cd build && \
+    cmake .. && make -j 4 && make install && cp ../lib/lib* /usr/local/lib/. && \
+    cp ../bin/salmon /usr/local/bin/.
 
 #########
 ### BEDtools
 #########
 RUN wget https://github.com/arq5x/bedtools2/releases/download/v2.26.0/bedtools-2.26.0.tar.gz && \
     tar -xf bedtools-2.26.0.tar.gz && cd bedtools2 && \
-    make && make install
+    make -j 4 && make install
 
 #########
 ### Java tools: Trimmomatic, FastQC
@@ -82,10 +93,11 @@ RUN wget http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.5
 #########
 ### SortmeRNA
 #########
-RUN wget http://bioinfo.lifl.fr/RNA/sortmerna/code/sortmerna-2.1-linux-64.tar.gz && \
-    tar -xf sortmerna-2.1-linux-64.tar.gz
-WORKDIR sortmerna-2.1-linux-64
-RUN cp sortmerna /usr/local/bin && cp indexdb_rna /usr/local/bin && \
+RUN wget https://github.com/biocore/sortmerna/archive/2.1.tar.gz && \
+    tar -xf 2.1.tar.gz
+WORKDIR sortmerna-2.1
+RUN ./configure && make -j 4 && make install || true
+RUN cp indexdb_rna /usr/local/bin && \
     cp -r rRNA_databases/ /usr/share/
 WORKDIR /usr/share/rRNA_databases
 COPY scripts/indexdb.sh /usr/share/rRNA_databases/
@@ -102,17 +114,17 @@ WORKDIR /build
 RUN wget https://github.com/lh3/bwa/releases/download/v0.7.15/bwa-0.7.15.tar.bz2 && \
     tar -xf bwa-0.7.15.tar.bz2
 WORKDIR bwa-0.7.15
-RUN make && cp bwa /usr/local/bin
+RUN make -j 4 && cp bwa /usr/local/bin
 
 #########
 ### Pip installs: HTSeq, PySam, MACS2
 #########
-RUN make && \
-    cp bwa /usr/local/bin/ && \
+RUN pip install numpy && \
     pip install htseq && \
     pip install PySam && \
     pip install MACS2 && \
-    pip install tornado && \
+    pip install tornado==4.4.3
+RUN apt install -y libfreetype6-dev libpng-dev libxft-dev && \
     pip install multiqc
 WORKDIR /build
 
@@ -120,8 +132,8 @@ WORKDIR /build
 ### USeq and Sissrs
 #########
 RUN mkdir /data && \
-    wget https://github.com/HuntsmanCancerInstitute/USeq/releases/download/USeq_9.0.7/USeq_9.0.7.zip && \
-    unzip USeq_9.0.7.zip && mv USeq_9.0.7 /usr/share/USeq && \
+    wget https://github.com/HuntsmanCancerInstitute/USeq/releases/download/USeq_9.0.8/USeq_9.0.8.zip && \
+    unzip USeq_9.0.8.zip && mv USeq_9.0.8 /usr/share/USeq && \
     wget http://dir.nhlbi.nih.gov/papers/lmi/epigenomes/sissrs/sissrs_v1.4.tar.gz && \
     tar -xf sissrs_v1.4.tar.gz && \
     cp sissrs.pl /usr/local/bin
@@ -132,7 +144,7 @@ RUN mkdir /data && \
 RUN rm /var/www/html/index.html && \
     ln -sf /home/training /var/www/html/home
 WORKDIR /var/www/html
-RUN curl -O http://jbrowse.org/releases/JBrowse-1.12.1.zip && \
+RUN wget http://jbrowse.org/releases/JBrowse-1.12.1.zip && \
     unzip JBrowse-1.12.1.zip
 WORKDIR /var/www/html/JBrowse-1.12.1
 RUN ./setup.sh && \
