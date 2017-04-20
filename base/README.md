@@ -27,7 +27,7 @@ Ready-to-work docker for next generation sequence analysis including binaries:
 - Sequence data analysis ([Useq](http://useq.sourceforge.net/)) [12]
 - Binding site determination ([SISSRs](http://www.rajajothi.com/sissrs/)) [13]
 
-For downstream analysis, this docker is based on bioconductor/release_sequencing [6] , which contains all the most commonly used downstream analysis tools implemented in R [7] .
+For downstream analysis, this docker is based on bioconductor/release_core2 [6] , which contains all the most commonly used downstream analysis tools implemented in R [7] .
 
 The ":with-data" tagged image used to contain a set of training data which is commonly used in our RNA-Seq training courses. Due to size concerns of the docker image, this tag is no longer available.
 
