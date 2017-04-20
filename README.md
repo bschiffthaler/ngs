@@ -12,32 +12,26 @@ docker build -t <my_image_name> base
 
 ----------------------
 
-# News
-
-* GateOne was added as a decent	option to connect via SSH cross-platform
-* JBrowse was added to allow for alignment visualisation (which also meant adding an apache2 server)
-* I recorded myself doing basic QC on the training data. Check [here](https://www.youtube.com/watch?v=1rNEkWSxB5s) for the video.
-
 # General information
 
 Ready-to-work docker for next generation sequence analysis including binaries:
 
-* Sequence data QC [(FastQC)](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
-* Trimming [(Trimmomatic)](http://www.usadellab.org/cms/?page=trimmomatic) [1]
-* rRNA filtering [(SortMeRNA)](http://bioinfo.lifl.fr/RNA/sortmerna/) [2]
-* Genome mapping ([STAR](https://github.com/alexdobin/STAR) [3] , [BWA](http://bio-bwa.sourceforge.net/) [4] , [kallisto](https://pachterlab.github.io/kallisto/) [16])
-* Feature Summarisation [(HTSeq)](http://www-huber.embl.de/HTSeq/doc/overview.html) [5]
-* File manipulation and exploration [(samtools,htslib,bcftools)](http://www.htslib.org/) [10] [11]
-* Alignment visualisation ([JBrowse](http://jbrowse.org/)) [12]
-* Peak calling ([MACS2](http://liulab.dfci.harvard.edu/MACS/))  [13]
-* Sequence data analysis ([Useq](http://useq.sourceforge.net/)) [14]
-* Binding site determination ([SISSRs](http://www.rajajothi.com/sissrs/)) [15]
+- Sequence data QC ([FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/), [MultiQC](http://multiqc.info/)) [15]
+- Trimming [(Trimmomatic)](http://www.usadellab.org/cms/?page=trimmomatic) [1]
+- rRNA filtering [(SortMeRNA)](http://bioinfo.lifl.fr/RNA/sortmerna/) [2]
+- Genome mapping ([STAR](https://github.com/alexdobin/STAR) [3] , [BWA](http://bio-bwa.sourceforge.net/) [4] , [kallisto](https://pachterlab.github.io/kallisto/) [14], [salmon](https://combine-lab.github.io/salmon/)[16])
+- Feature Summarisation [(HTSeq)](http://www-huber.embl.de/HTSeq/doc/overview.html) [5]
+- File manipulation and exploration [(samtools,htslib,bcftools)](http://www.htslib.org/) [8],[9]
+- Alignment visualisation ([JBrowse](http://jbrowse.org/)) [10]
+- Peak calling ([MACS2](http://liulab.dfci.harvard.edu/MACS/))  [11]
+- Sequence data analysis ([Useq](http://useq.sourceforge.net/)) [12]
+- Binding site determination ([SISSRs](http://www.rajajothi.com/sissrs/)) [13]
 
-For downstream analysis, this docker is based on bioconductor/release_sequencing [6] , which contains all the most commonly used downstream analysis tools implemented in R [7] .
+For downstream analysis, this docker is based on bioconductor/release_base2 [6] , which contains all the most commonly used downstream analysis tools implemented in R [7] .
 
-The ":with-data" tagged image contains a set of training data which is commonly used in our RNA-Seq training courses. The data is a sub-sampled set from Robinson, Delhomme et al. 2014 [9]. I also included the _Populus trichocarpa_ genome assembly and annotation [8] as well as a _P. tremula_ in-house draft assembly (not published, contact us for more information).
+The ":with-data" tagged image used to contain a set of training data which is commonly used in our RNA-Seq training courses. Due to size concerns of the docker image, this tag is no longer available.
 
-The source (+Dockerfile) which was used to build this container, is [here](https://github.com/bschiffthaler/ngs) on GitHub! 
+The source (+Dockerfile) which was used to build this container, is [here](https://github.com/bschiffthaler/ngs) on GitHub!
 
 # Common use cases
 
@@ -48,17 +42,17 @@ For reasons of brevity, I will not be going into great detail (see the protocol)
 ## Index
 
 1. Basics
-	*  Mounting host directories inside the docker container
-1. Technical quality control with FastQC
-1. rRNA sorting with SortMeRNA
-1. Quality trimming with Trimmomatic
-1. Mapping to the reference genome with STAR
-	*  Creating a STAR genome
-	*  Mapping my reads
-1. Visualisation of the alignments in JBrowse 
-1. Feature summarisation using HTSeq
-1. Downstream analysis using RStudio
-1. References
+   - Mounting host directories inside the docker container
+2. Technical quality control with FastQC
+3. rRNA sorting with SortMeRNA
+4. Quality trimming with Trimmomatic
+5. Mapping to the reference genome with STAR
+   - Creating a STAR genome
+   - Mapping my reads
+6. Visualisation of the alignments in JBrowse
+7. Feature summarisation using HTSeq
+8. Downstream analysis using RStudio
+9. References
 
 ## Basics
 
@@ -100,6 +94,7 @@ For convenience, I included an environment variable $SORTMERNA_DB, which can be 
 ```
 docker run --rm bschiffthaler/ngs bash -c 'sortmerna --ref $SORTMERNA_DB <...>'
 ```
+
 Wrapping the command in `bash -c` here is crucial, since otherwise the environment variable would not be passed correctly.
 
 If I would like to sort my FASTQ file which I got from sequencing:
@@ -110,10 +105,9 @@ docker run -i -t --rm -v $(pwd):/data bschiffthaler/ngs sortmerna --ref \
 --reads /data/202_subset_1.fq \
 --other /data/202_subset_1_sorted \
 --aligned /data/202_subset_1_rRNA_hits --fastx
-
 ```
 
-This outputs two files: 
+This outputs two files:
 
 1. 202_subset_1_sorted.fq - which contains all reads which show **NO** hits to an rRNA
 2. 202_subset_1_rRNA_hits.fq - which contains all reads which **DO** show hits to an rRNA
@@ -164,6 +158,7 @@ Unlike the previous commands, we need to keep the docker container alive and int
 ```
 docker run -p 80:80 -v $(pwd):/data -ti bschiffthaler/ngs bash -l
 ```
+
 First, we start by adding our reference(s) to JBrowse. This is done with perl scripts which are delivered with JBrowse. The reference sequence in FASTA format and the reference annotation in GFF3 format are in my current working directory, as are the alignment results in BAM format.
 
 Let's start by adding the FASTA and GFF3 files as tracks in JBrowse:
@@ -238,9 +233,7 @@ You should see your generated data, which you can now further process inside R. 
 
 For the actual analysis, I would recommend the documentation of [DESeq2](http://www.bioconductor.org/packages/release/bioc/html/DESeq2.html), [edgeR](http://master.bioconductor.org/packages/release/bioc/html/edgeR.html) or [limma](http://master.bioconductor.org/packages/release/bioc/html/limma.html). An R transcript of how the example data was analysed is available [here](https://microasp.upsc.se/root/upscb-public/blob/master/projects/Robinson2014/src/Robinson2014-rnaseq-analysis.R).
 
-
-**References**
-----------------------
+## **References**
 
 [1] Bolger, A. M., Lohse, M., & Usadel, B. (2014). Trimmomatic: a flexible trimmer for Illumina sequence data. Bioinformatics (Oxford, England), 1–7. doi:10.1093/bioinformatics/btu170
 
@@ -256,20 +249,20 @@ For the actual analysis, I would recommend the documentation of [DESeq2](http://
 
 [7] R Core Team. (2014). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria, URL http://www.R–project.org/.
 
-[8] Tuskan, G. A., Difazio, S., Jansson, S., Bohlmann, J., Grigoriev, I., Hellsten, U., … Rokhsar, D. (2006). The genome of black cottonwood, Populus trichocarpa (Torr. & Gray). Science (New York, N.Y.), 313, 1596–1604. doi:10.1126/science.1128691
+[8] Li, H., Handsaker, B., Wysoker, A., Fennell, T., Ruan, J., Homer, N., … Durbin, R. (2009). The Sequence Alignment/Map format and SAMtools. Bioinformatics, 25, 2078–2079. doi:10.1093/bioinformatics/btp352
 
-[9] Robinson, K. M., Delhomme, N., Mähler, N., Schiffthaler, B., Onskog, J., Albrectsen, B. R., … Street, N. R. (2014). Populus tremula (European aspen) shows no evidence of sexual dimorphism. BMC Plant Biology, 14, 276. doi:10.1186/s12870-014-0276-5
+[9] Li, H. (2011). A statistical framework for SNP calling, mutation discovery, association mapping and population genetical parameter estimation from sequencing data. Bioinformatics, 27, 2987–2993. doi:10.1093/bioinformatics/btr509
 
-[10] Li, H., Handsaker, B., Wysoker, A., Fennell, T., Ruan, J., Homer, N., … Durbin, R. (2009). The Sequence Alignment/Map format and SAMtools. Bioinformatics, 25, 2078–2079. doi:10.1093/bioinformatics/btp352
+[10] Skinner, M. E., Uzilov, A. V., Stein, L. D., Mungall, C. J., & Holmes, I. H. (2009). JBrowse: A next-generation genome browser. Genome Research, 19, 1630–1638. doi:10.1101/gr.094607.109
 
-[11] Li, H. (2011). A statistical framework for SNP calling, mutation discovery, association mapping and population genetical parameter estimation from sequencing data. Bioinformatics, 27, 2987–2993. doi:10.1093/bioinformatics/btr509
+[11] Zhang, Y., Liu, T., Meyer, C. A., Eeckhoute, J., Johnson, D. S., Bernstein, B. E., … Liu, X. S. (2008). Model-based analysis of ChIP-Seq (MACS). Genome Biology, 9(9), R137. doi:10.1186/gb-2008-9-9-r137
 
-[12] Skinner, M. E., Uzilov, A. V., Stein, L. D., Mungall, C. J., & Holmes, I. H. (2009). JBrowse: A next-generation genome browser. Genome Research, 19, 1630–1638. doi:10.1101/gr.094607.109
+[12] Nix, D. A., Courdy, S. J., & Boucher, K. M. (2008). Empirical methods for controlling false positives and estimating confidence in ChIP-Seq peaks. BMC Bioinformatics, 9, 523. doi:10.1186/1471-2105-9-523
 
-[13] Zhang, Y., Liu, T., Meyer, C. A., Eeckhoute, J., Johnson, D. S., Bernstein, B. E., … Liu, X. S. (2008). Model-based analysis of ChIP-Seq (MACS). Genome Biology, 9(9), R137. doi:10.1186/gb-2008-9-9-r137
+[13] Jothi, R., Cuddapah, S., Barski, A., Cui, K., & Zhao, K. (2008). Genome-wide identification of in vivo protein-DNA binding sites from ChIP-Seq data. Nucleic Acids Research, 36(16), 5221–5231. doi:10.1093/nar/gkn488
 
-[14] Nix, D. A., Courdy, S. J., & Boucher, K. M. (2008). Empirical methods for controlling false positives and estimating confidence in ChIP-Seq peaks. BMC Bioinformatics, 9, 523. doi:10.1186/1471-2105-9-523
+[14] Bray, N. L., Pimentel, H., Melsted, P., & Pachter, L. (2015). Near-optimal RNA-Seq quantification. aRxiv. http://doi.org/arXiv:1505.02710
 
-[15] Jothi, R., Cuddapah, S., Barski, A., Cui, K., & Zhao, K. (2008). Genome-wide identification of in vivo protein-DNA binding sites from ChIP-Seq data. Nucleic Acids Research, 36(16), 5221–5231. doi:10.1093/nar/gkn488
+[15] Ewels, P., Magnusson, M., Lundin, S., & K??ller, M. (2016). MultiQC: Summarize analysis results for multiple tools and samples in a single report. Bioinformatics, 32(19), 3047–3048. http://doi.org/10.1093/bioinformatics/btw354
 
-[16] Bray, N. L., Pimentel, H., Melsted, P., & Pachter, L. (2015). Near-optimal RNA-Seq quantification. aRxiv. http://doi.org/arXiv:1505.02710
+[16] Patro, R., Duggal, G., Love, M. I., Irizarry, R. A., & Kingsford, C. (2017). Salmon provides fast and bias-aware quantification of transcript expression. Nature Methods.
