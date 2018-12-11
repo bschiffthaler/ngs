@@ -10,14 +10,13 @@ RUN echo "alias ll='ls -la -G'" >> /home/training/.profile
 #########
 ### Aptitude packages
 #########
-RUN apt update
-RUN apt install -y \
+RUN apt update && apt install -y --fix-missing \
     wget libghc-zlib-dev \
     libncurses-dev git unzip ftp libzmq3-dev \
     nano python2.7-dev ftp \
     apache2 openssl curl libboost-all-dev \
     supervisor openssh-server libbz2-dev \
-    liblzma-dev automake cmake && \
+    liblzma-dev automake cmake openjdk-8-jre-headless && \
     mkdir build && \
     usermod -G training,www-data training
 WORKDIR /build
@@ -25,37 +24,37 @@ WORKDIR /build
 #########
 ### HTSlib tools: Samtools, Bcftools
 #########
-RUN wget https://github.com/samtools/samtools/releases/download/1.4/samtools-1.4.tar.bz2 \
-    https://github.com/samtools/bcftools/releases/download/1.4/bcftools-1.4.tar.bz2 \
-    https://github.com/samtools/htslib/releases/download/1.4/htslib-1.4.tar.bz2 && \
-    tar -xf htslib-1.4.tar.bz2
-WORKDIR htslib-1.4
+RUN wget https://github.com/samtools/samtools/releases/download/1.9/samtools-1.9.tar.bz2 \
+    https://github.com/samtools/bcftools/releases/download/1.9/bcftools-1.9.tar.bz2 \
+    https://github.com/samtools/htslib/releases/download/1.9/htslib-1.9.tar.bz2 && \
+    tar -xf htslib-1.9.tar.bz2
+WORKDIR htslib-1.9
 RUN ./configure && make -j 4 && make install
 WORKDIR /build
-RUN tar -xf bcftools-1.4.tar.bz2
-WORKDIR bcftools-1.4
+RUN tar -xf bcftools-1.9.tar.bz2
+WORKDIR bcftools-1.9
 RUN make -j 4 && make install
 WORKDIR /build
-RUN tar -xf samtools-1.4.tar.bz2
-WORKDIR samtools-1.4
+RUN tar -xf samtools-1.9.tar.bz2
+WORKDIR samtools-1.9
 RUN make -j 4 && make install
 WORKDIR /build
 
 #########
 ### STAR
 #########
-RUN wget https://github.com/alexdobin/STAR/archive/2.5.3a.tar.gz && \
-    tar -xf 2.5.3a.tar.gz
-WORKDIR STAR-2.5.3a/bin/Linux_x86_64_static
+RUN wget https://github.com/alexdobin/STAR/archive/2.6.1d.tar.gz && \
+    tar -xf 2.6.1d.tar.gz
+WORKDIR STAR-2.6.1d/bin/Linux_x86_64_static
 RUN cp STAR /usr/local/bin
 WORKDIR /build
 
 #########
 ### kallisto
 #########
-RUN wget https://github.com/pachterlab/kallisto/releases/download/v0.43.1/kallisto_linux-v0.43.1.tar.gz && \
-    tar -xf kallisto_linux-v0.43.1.tar.gz
-WORKDIR kallisto_linux-v0.43.1
+RUN wget https://github.com/pachterlab/kallisto/releases/download/v0.45.0/kallisto_linux-v0.45.0.tar.gz && \
+    tar -xf kallisto_linux-v0.45.0.tar.gz
+WORKDIR kallisto_linux-v0.45.0
 RUN cp kallisto /usr/local/bin
 WORKDIR /build
 
@@ -63,24 +62,25 @@ WORKDIR /build
 ### Salmon
 #########
 WORKDIR /build
-RUN wget https://github.com/COMBINE-lab/salmon/archive/v0.8.2.tar.gz && \
-    tar -xf v0.8.2.tar.gz && \
-    cd /build/salmon-0.8.2 && mkdir build && cd build && \
-    cmake .. && make -j 4 && make install && cp ../lib/lib* /usr/local/lib/. && \
-    cp ../bin/salmon /usr/local/bin/.
+RUN wget https://github.com/COMBINE-lab/salmon/releases/download/v0.12.0/salmon-0.12.0_linux_x86_64.tar.gz && \
+    tar -xf salmon-0.12.0_linux_x86_64.tar.gz && \
+    cd /build/salmon-0.12.0_linux_x86_64 && \
+    cp bin/salmon /usr/local/bin && \
+    cp lib/liblzma.so.0 /usr/local/lib && \
+    cp lib/libtbb* /usr/local/lib
 
 #########
 ### BEDtools
 #########
-RUN wget https://github.com/arq5x/bedtools2/releases/download/v2.26.0/bedtools-2.26.0.tar.gz && \
-    tar -xf bedtools-2.26.0.tar.gz && cd bedtools2 && \
+RUN wget https://github.com/arq5x/bedtools2/releases/download/v2.27.1/bedtools-2.27.1.tar.gz && \
+    tar -xf bedtools-2.27.1.tar.gz && cd bedtools2 && \
     make -j 4 && make install
 
 #########
 ### Java tools: Trimmomatic, FastQC
 #########
-RUN wget http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.5.zip && \
-    unzip fastqc_v0.11.5.zip && \
+RUN wget http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.8.zip && \
+    unzip fastqc_v0.11.8.zip && \
     chmod +x FastQC/fastqc && \
     cp -r FastQC /usr/share/ && \
     ln -s /usr/share/FastQC/fastqc /usr/bin/ && \
@@ -111,9 +111,9 @@ WORKDIR /build
 #########
 ### BWA
 #########
-RUN wget https://github.com/lh3/bwa/releases/download/v0.7.15/bwa-0.7.15.tar.bz2 && \
-    tar -xf bwa-0.7.15.tar.bz2
-WORKDIR bwa-0.7.15
+RUN wget https://github.com/lh3/bwa/releases/download/v0.7.17/bwa-0.7.17.tar.bz2 && \
+    tar -xf bwa-0.7.17.tar.bz2
+WORKDIR bwa-0.7.17
 RUN make -j 4 && cp bwa /usr/local/bin
 
 #########
@@ -132,8 +132,8 @@ WORKDIR /build
 ### USeq and Sissrs
 #########
 RUN mkdir /data && \
-    wget https://github.com/HuntsmanCancerInstitute/USeq/releases/download/USeq_9.0.8/USeq_9.0.8.zip && \
-    unzip USeq_9.0.8.zip && mv USeq_9.0.8 /usr/share/USeq && \
+    wget https://github.com/HuntsmanCancerInstitute/USeq/releases/download/USeq_9.1.9/USeq_9.1.9.zip && \
+    unzip USeq_9.1.9.zip && mv USeq_9.1.9 /usr/share/USeq && \
     wget http://dir.nhlbi.nih.gov/papers/lmi/epigenomes/sissrs/sissrs_v1.4.tar.gz && \
     tar -xf sissrs_v1.4.tar.gz && \
     cp sissrs.pl /usr/local/bin
@@ -144,17 +144,17 @@ RUN mkdir /data && \
 RUN rm /var/www/html/index.html && \
     ln -sf /home/training /var/www/html/home
 WORKDIR /var/www/html
-RUN wget http://jbrowse.org/releases/JBrowse-1.12.1.zip && \
-    unzip JBrowse-1.12.1.zip
-WORKDIR /var/www/html/JBrowse-1.12.1
+RUN wget https://github.com/GMOD/jbrowse/releases/download/1.15.4-release/JBrowse-1.15.4.zip && \
+    unzip JBrowse-1.15.4.zip
+WORKDIR /var/www/html/JBrowse-1.15.4
 RUN ./setup.sh && \
     mkdir -p data/bam && \
     chown -R www-data:www-data /var/www/html && \
-    chmod a+rwx /var/www/html/JBrowse-1.12.1/data/bam && \
+    chmod a+rwx /var/www/html/JBrowse-1.15.4/data/bam && \
     touch data/tracks.conf && \
-    chmod a+rw    /var/www/html/JBrowse-1.12.1/data/tracks.conf
+    chmod a+rw    /var/www/html/JBrowse-1.15.4/data/tracks.conf
 WORKDIR /
-RUN rm /var/www/html/JBrowse-1.12.1.zip && \
+RUN rm /var/www/html/JBrowse-1.15.4.zip && \
     rm -rf /build/*
 ADD scripts/add_JBrowse_tracks.sh /usr/local/bin/add_JBrowse_tracks.sh
 
@@ -178,5 +178,7 @@ RUN mkdir /home/training/.r-library && \
     sudo -u training Rscript /build/R_installs.R
 
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+VOLUME /home/training/share
 EXPOSE 80 8888 8787 443
 CMD ["/usr/bin/supervisord","-c","/etc/supervisor/conf.d/supervisord.conf"]
+

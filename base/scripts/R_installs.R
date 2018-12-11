@@ -1,8 +1,8 @@
 rlib='/home/training/.r-library'
-source("http://bioconductor.org/biocLite.R")
-biocLite(c('pvclust', 'vsn', 'DESeq2', 'edgeR', 'ggplot2', 
+install.packages('BiocManager')
+BiocManager::install(c('pvclust', 'vsn', 'DESeq2', 'edgeR', 'ggplot2', 
            'reshape2', 'randomForest', 'lars', 'WGCNA', 
-           'tximport', 'dplyr'),
+           'tximport', 'dplyr', 'tidyr'),
          ask = FALSE,
          suppressUpdates = TRUE,
          suppressAutoUpdate = TRUE,
