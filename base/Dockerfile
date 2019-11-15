@@ -11,12 +11,12 @@ RUN echo "alias ll='ls -la -G'" >> /home/training/.profile
 ### Aptitude packages
 #########
 RUN apt update && apt install -y --fix-missing \
-    wget libghc-zlib-dev \
+    wget libghc-zlib-dev libfreetype6-dev libpng-dev libxft-dev \
     libncurses-dev git unzip ftp libzmq3-dev \
-    nano python2.7-dev ftp \
+    nano python3-dev python3-pip ftp \
     apache2 openssl curl libboost-all-dev \
     supervisor openssh-server libbz2-dev \
-    liblzma-dev automake cmake openjdk-8-jre-headless && \
+    liblzma-dev automake cmake openjdk-8-jre-headless shellinabox && \
     mkdir build && \
     usermod -G training,www-data training
 WORKDIR /build
@@ -43,18 +43,18 @@ WORKDIR /build
 #########
 ### STAR
 #########
-RUN wget https://github.com/alexdobin/STAR/archive/2.6.1d.tar.gz && \
-    tar -xf 2.6.1d.tar.gz
-WORKDIR STAR-2.6.1d/bin/Linux_x86_64_static
-RUN cp STAR /usr/local/bin
+RUN wget https://github.com/alexdobin/STAR/archive/2.7.3a.tar.gz && \
+    tar -xf 2.7.3a.tar.gz
+WORKDIR STAR-2.7.3a/bin/Linux_x86_64_static
+RUN cp STAR* /usr/local/bin
 WORKDIR /build
 
 #########
 ### kallisto
 #########
-RUN wget https://github.com/pachterlab/kallisto/releases/download/v0.45.0/kallisto_linux-v0.45.0.tar.gz && \
-    tar -xf kallisto_linux-v0.45.0.tar.gz
-WORKDIR kallisto_linux-v0.45.0
+RUN wget https://github.com/pachterlab/kallisto/releases/download/v0.46.1/kallisto_linux-v0.46.1.tar.gz && \
+    tar -xf kallisto_linux-v0.46.1.tar.gz
+WORKDIR /build/kallisto
 RUN cp kallisto /usr/local/bin
 WORKDIR /build
 
@@ -62,18 +62,18 @@ WORKDIR /build
 ### Salmon
 #########
 WORKDIR /build
-RUN wget https://github.com/COMBINE-lab/salmon/releases/download/v0.12.0/salmon-0.12.0_linux_x86_64.tar.gz && \
-    tar -xf salmon-0.12.0_linux_x86_64.tar.gz && \
-    cd /build/salmon-0.12.0_linux_x86_64 && \
-    cp bin/salmon /usr/local/bin && \
+RUN wget https://github.com/COMBINE-lab/salmon/releases/download/v1.0.0/salmon-1.0.0_linux_x86_64.tar.gz && \
+    tar -xf salmon-1.0.0_linux_x86_64.tar.gz
+WORKDIR /build/salmon-latest_linux_x86_64/
+RUN cp bin/salmon /usr/local/bin && \
     cp lib/liblzma.so.0 /usr/local/lib && \
     cp lib/libtbb* /usr/local/lib
 
 #########
 ### BEDtools
 #########
-RUN wget https://github.com/arq5x/bedtools2/releases/download/v2.27.1/bedtools-2.27.1.tar.gz && \
-    tar -xf bedtools-2.27.1.tar.gz && cd bedtools2 && \
+RUN wget https://github.com/arq5x/bedtools2/releases/download/v2.29.0/bedtools-2.29.0.tar.gz && \
+    tar -xf bedtools-2.29.0.tar.gz && cd bedtools2 && \
     make -j 4 && make install
 
 #########
@@ -84,22 +84,28 @@ RUN wget http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.8
     chmod +x FastQC/fastqc && \
     cp -r FastQC /usr/share/ && \
     ln -s /usr/share/FastQC/fastqc /usr/bin/ && \
-    wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.36.zip && \
-    unzip Trimmomatic-0.36.zip && \
-    cp -r Trimmomatic-0.36 /usr/share/ && \
-    echo '#!/bin/bash\njava -jar /usr/share/Trimmomatic-0.36/trimmomatic-0.36.jar $@' > /usr/bin/trimmomatic && \
+    wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.39.zip && \
+    unzip Trimmomatic-0.39.zip && \
+    cp -r Trimmomatic-0.39 /usr/share/ && \
+    echo '#!/bin/bash\njava -jar /usr/share/Trimmomatic-0.39/trimmomatic-0.39.jar $@' > /usr/bin/trimmomatic && \
     chmod +x /usr/bin/trimmomatic
 
 #########
 ### SortmeRNA
 #########
-RUN wget https://github.com/biocore/sortmerna/archive/2.1.tar.gz && \
-    tar -xf 2.1.tar.gz
-WORKDIR sortmerna-2.1
-RUN ./configure && make -j 4 && make install || true
-RUN cp indexdb_rna /usr/local/bin && \
-    cp -r rRNA_databases/ /usr/share/
+WORKDIR /build
+COPY sortmerna-3.0.4-Linux.sh /build/sortmerna-3.0.4-Linux.sh
+RUN sh sortmerna-3.0.4-Linux.sh --skip-license --prefix=/usr --exclude-subdir
+RUN mkdir /usr/share/rRNA_databases
 WORKDIR /usr/share/rRNA_databases
+RUN wget https://raw.githubusercontent.com/biocore/sortmerna/master/rRNA_databases/rfam-5.8s-database-id98.fasta && \
+    wget https://raw.githubusercontent.com/biocore/sortmerna/master/rRNA_databases/rfam-5s-database-id98.fasta && \
+    wget https://raw.githubusercontent.com/biocore/sortmerna/master/rRNA_databases/silva-arc-16s-id95.fasta && \
+    wget https://raw.githubusercontent.com/biocore/sortmerna/master/rRNA_databases/silva-arc-23s-id98.fasta && \
+    wget https://raw.githubusercontent.com/biocore/sortmerna/master/rRNA_databases/silva-euk-28s-id98.fasta && \
+    wget https://raw.githubusercontent.com/biocore/sortmerna/master/rRNA_databases/silva-euk-18s-id95.fasta && \
+    wget https://raw.githubusercontent.com/biocore/sortmerna/master/rRNA_databases/silva-bac-16s-id90.fasta && \
+    wget https://raw.githubusercontent.com/biocore/sortmerna/master/rRNA_databases/silva-bac-23s-id98.fasta
 COPY scripts/indexdb.sh /usr/share/rRNA_databases/
 COPY scripts/makeDbList.sh /usr/share/rRNA_databases/
 RUN ./indexdb.sh
@@ -119,21 +125,19 @@ RUN make -j 4 && cp bwa /usr/local/bin
 #########
 ### Pip installs: HTSeq, PySam, MACS2
 #########
-RUN pip install numpy && \
-    pip install htseq && \
-    pip install PySam && \
-    pip install MACS2 && \
-    pip install tornado==4.4.3
-RUN apt install -y libfreetype6-dev libpng-dev libxft-dev && \
-    pip install multiqc
+RUN pip3 install numpy && \
+    pip3 install htseq && \
+    pip3 install PySam && \
+    pip3 install MACS2
+RUN pip3 install multiqc
 WORKDIR /build
 
 #########
 ### USeq and Sissrs
 #########
 RUN mkdir /data && \
-    wget https://github.com/HuntsmanCancerInstitute/USeq/releases/download/USeq_9.1.9/USeq_9.1.9.zip && \
-    unzip USeq_9.1.9.zip && mv USeq_9.1.9 /usr/share/USeq && \
+    wget https://github.com/HuntsmanCancerInstitute/USeq/releases/download/USeq_9.2.3/USeq_9.2.3.zip && \
+    unzip USeq_9.2.3.zip && mv USeq_9.2.3 /usr/share/USeq && \
     wget http://dir.nhlbi.nih.gov/papers/lmi/epigenomes/sissrs/sissrs_v1.4.tar.gz && \
     tar -xf sissrs_v1.4.tar.gz && \
     cp sissrs.pl /usr/local/bin
@@ -144,26 +148,19 @@ RUN mkdir /data && \
 RUN rm /var/www/html/index.html && \
     ln -sf /home/training /var/www/html/home
 WORKDIR /var/www/html
-RUN wget https://github.com/GMOD/jbrowse/releases/download/1.15.4-release/JBrowse-1.15.4.zip && \
-    unzip JBrowse-1.15.4.zip
-WORKDIR /var/www/html/JBrowse-1.15.4
+RUN wget https://github.com/GMOD/jbrowse/releases/download/1.16.6-release/JBrowse-1.16.6.zip && \
+    unzip JBrowse-1.16.6.zip
+WORKDIR /var/www/html/JBrowse-1.16.6
 RUN ./setup.sh && \
     mkdir -p data/bam && \
     chown -R www-data:www-data /var/www/html && \
-    chmod a+rwx /var/www/html/JBrowse-1.15.4/data/bam && \
+    chmod a+rwx /var/www/html/JBrowse-1.16.6/data/bam && \
     touch data/tracks.conf && \
-    chmod a+rw    /var/www/html/JBrowse-1.15.4/data/tracks.conf
+    chmod a+rw    /var/www/html/JBrowse-1.16.6/data/tracks.conf
 WORKDIR /
-RUN rm /var/www/html/JBrowse-1.15.4.zip && \
+RUN rm /var/www/html/JBrowse-1.16.6.zip && \
     rm -rf /build/*
 ADD scripts/add_JBrowse_tracks.sh /usr/local/bin/add_JBrowse_tracks.sh
-
-#########
-### GateOne SSH interface
-#########
-RUN git clone https://github.com/liftoff/GateOne/ && \
-    cd GateOne && python setup.py install && \
-    python run_gateone.py --configure && cd ..
 
 #########
 ### R installs

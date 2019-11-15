@@ -1,15 +1,8 @@
 # News
 
-- Moved to use bioconductor/release_core2 instead of the release_sequencing legacy image
-- Added salmon
-- SortMeRNA is now source compiled due to a threading bug that prevented parallelism to work
-- Updated htslib to 1.4, STAR to 2.5.3a, USEQ to 9.0.8
-- Updated htslib to 1.3.2, STAR to 2.5.2b, USEQ to 9.0.7
-- Added MultiQC
-- Discontinued the ":with-data" tag
-- Kallisto was added for alignment free transcript quantification
-- GateOne was added as a decentoption to connect via SSH cross-platform
-- JBrowse was added to allow for alignment visualisation (which also meant adding an apache2 server)
+- Nov 15th 2019: Updated software to most recent stable versions (at the time of this update)
+- Nov 15th 2019: Changed GateOne (unmaintained) to shellinabox
+
 - I recorded myself doing basic QC on the training data. Check [here](https://www.youtube.com/watch?v=1rNEkWSxB5s) for the video.
 
 # General information
